@@ -17,9 +17,13 @@ func commandMap() error {
 	}
 	if res.Next != "" {
 		next = &res.Next
+	} else {
+		next = nil
 	}
 	if res.Previous != "" {
 		prev = &res.Previous
+	} else {
+		prev = nil
 	}
 	for _, i := range res.Results {
 		fmt.Printf("%s\n", i.Name)
@@ -37,9 +41,13 @@ func commandMapb() error {
 	}
 	if res.Next != "" {
 		next = &res.Next
+	} else {
+		next = nil
 	}
 	if res.Previous != "" {
 		prev = &res.Previous
+	} else {
+		prev = nil
 	}
 	for _, i := range res.Results {
 		fmt.Printf("%s\n", i.Name)

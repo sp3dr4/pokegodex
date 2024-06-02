@@ -10,7 +10,7 @@ import (
 func startRepl() {
 	reader := bufio.NewScanner(os.Stdin)
 	for {
-		fmt.Print("Pokedex > ")
+		fmt.Print("\nPokedex > ")
 		reader.Scan()
 
 		words := cleanInput(reader.Text())
