@@ -1,4 +1,4 @@
-package location
+package pokeapi
 
 import (
 	"encoding/json"
@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sp3dr4/pokegodex/internal/pokecache"
+	"github.com/sp3dr4/pokegodex/internal/cache"
 )
 
-var cache pokecache.Cache = *pokecache.NewCache(2 * time.Minute)
+var c cache.Cache = *cache.NewCache(2 * time.Minute)
 
 type Location struct {
 	Name string `json:"name"`
@@ -30,7 +30,7 @@ func ListLocations(pageUrl *string) (*LocationsResponse, error) {
 		url = *pageUrl
 	}
 
-	body, ok := cache.Get(url)
+	body, ok := c.Get(url)
 	if !ok {
 		res, err := http.Get(url)
 		if err != nil {
@@ -46,7 +46,7 @@ func ListLocations(pageUrl *string) (*LocationsResponse, error) {
 		if err != nil {
 			return nil, fmt.Errorf("err reading response: %v", err)
 		}
-		cache.Add(url, body)
+		c.Add(url, body)
 	}
 
 	locations := LocationsResponse{}

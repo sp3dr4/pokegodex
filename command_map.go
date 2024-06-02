@@ -4,14 +4,17 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/sp3dr4/pokegodex/internal/location"
+	"github.com/sp3dr4/pokegodex/internal/pokeapi"
 )
 
 var next *string
 var prev *string
 
-func commandMap() error {
-	res, err := location.ListLocations(next)
+func commandMap(args ...string) error {
+	if len(args) > 0 {
+		return errors.New("command does not accept arguments")
+	}
+	res, err := pokeapi.ListLocations(next)
 	if err != nil {
 		return err
 	}
@@ -31,11 +34,14 @@ func commandMap() error {
 	return nil
 }
 
-func commandMapb() error {
+func commandMapb(args ...string) error {
+	if len(args) > 0 {
+		return errors.New("command does not accept arguments")
+	}
 	if prev == nil {
 		return errors.New("no locations history found")
 	}
-	res, err := location.ListLocations(prev)
+	res, err := pokeapi.ListLocations(prev)
 	if err != nil {
 		return err
 	}
