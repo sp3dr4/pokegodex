@@ -3,14 +3,7 @@ package pokeapi
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"time"
-
-	"github.com/sp3dr4/pokegodex/internal/cache"
 )
-
-var c cache.Cache = *cache.NewCache(2 * time.Minute)
 
 type Location struct {
 	Name string `json:"name"`
@@ -25,28 +18,14 @@ type LocationsResponse struct {
 }
 
 func ListLocations(pageUrl *string) (*LocationsResponse, error) {
-	url := "https://pokeapi.co/api/v2/location"
+	url := "https://pokeapi.co/api/v2/location-area"
 	if pageUrl != nil {
 		url = *pageUrl
 	}
 
-	body, ok := c.Get(url)
-	if !ok {
-		res, err := http.Get(url)
-		if err != nil {
-			return nil, fmt.Errorf("err fetching list of locations: %v", err)
-		}
-		body, err = io.ReadAll(res.Body)
-		res.Body.Close()
-
-		if res.StatusCode > 299 {
-			return nil, fmt.Errorf("response failed with status code: %d and\nbody: %s", res.StatusCode, body)
-		}
-
-		if err != nil {
-			return nil, fmt.Errorf("err reading response: %v", err)
-		}
-		c.Add(url, body)
+	body, err := Get(url)
+	if err != nil {
+		return nil, err
 	}
 
 	locations := LocationsResponse{}
