@@ -44,7 +44,7 @@ func (c *Cache) reapLoop(interval time.Duration) {
 		c.mu.Lock()
 		for key, entry := range c.entries {
 			if t.Sub(entry.createdAt) > interval {
-				fmt.Printf("\tdeleting key %s\n", key)
+				fmt.Printf("\t> deleting key %s\n", key)
 				delete(c.entries, key)
 			}
 		}

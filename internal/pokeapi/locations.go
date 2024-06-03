@@ -23,7 +23,7 @@ func ListLocations(pageUrl *string) (*LocationsResponse, error) {
 		url = *pageUrl
 	}
 
-	body, err := Get(url)
+	body, err := get(url)
 	if err != nil {
 		return nil, err
 	}

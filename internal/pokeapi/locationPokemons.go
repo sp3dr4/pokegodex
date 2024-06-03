@@ -23,7 +23,7 @@ type PokemonsResponse struct {
 func ListLocationPokemons(name string) (*PokemonsResponse, error) {
 	url := "https://pokeapi.co/api/v2/location-area/" + name
 
-	body, err := Get(url)
+	body, err := get(url)
 	if err != nil {
 		return nil, err
 	}

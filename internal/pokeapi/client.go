@@ -11,7 +11,7 @@ import (
 
 var c cache.Cache = *cache.NewCache(2 * time.Minute)
 
-func Get(url string) ([]byte, error) {
+func get(url string) ([]byte, error) {
 	body, ok := c.Get(url)
 	if !ok {
 		res, err := http.Get(url)
