@@ -20,6 +20,11 @@ type Pokemon struct {
 	weight         int
 	id             int
 	name           string
+	types          []string
+	stats          []struct {
+		name  string
+		value int
+	}
 }
 
 func (p *Pokemon) doesBallCatch() bool {
@@ -35,12 +40,28 @@ func (p *Pokemon) doesBallCatch() bool {
 }
 
 func fromResponse(resp *pokeapi.PokemonDetailsResponse) *Pokemon {
+	types := make([]string, len(resp.Types))
+	for i, rt := range resp.Types {
+		types[i] = rt.Type.Name
+	}
+	stats := make([]struct {
+		name  string
+		value int
+	}, len(resp.Stats))
+	for i, rs := range resp.Stats {
+		stats[i] = struct {
+			name  string
+			value int
+		}{name: rs.Stat.Name, value: rs.BaseStat}
+	}
 	return &Pokemon{
 		baseExperience: resp.BaseExperience,
 		height:         resp.Height,
 		weight:         resp.Weight,
 		id:             resp.ID,
 		name:           resp.Name,
+		types:          types,
+		stats:          stats,
 	}
 }
 
