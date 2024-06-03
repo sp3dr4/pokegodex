@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/fatih/color"
 	"github.com/sp3dr4/pokegodex/internal/pokeapi"
 )
 
@@ -94,7 +95,7 @@ func commandCatch(args ...string) error {
 	pokemon := fromResponse(res)
 	if pokemon.doesBallCatch() {
 		pokedex[name] = pokemon
-		fmt.Printf("%s was caught!\n", name)
+		color.Green("%s was caught!\n", name)
 	} else {
 		fmt.Printf("%s escaped!\n", name)
 	}

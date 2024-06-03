@@ -5,12 +5,17 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func startRepl() {
+	cyan := color.New(color.FgCyan, color.Bold).SprintFunc()
+	redErr := color.New(color.FgRed).SprintFunc()
+
 	reader := bufio.NewScanner(os.Stdin)
 	for {
-		fmt.Print("\nPokedex > ")
+		fmt.Printf("\n%s > ", cyan("Pokedex"))
 		reader.Scan()
 
 		words := cleanInput(reader.Text())
@@ -24,11 +29,11 @@ func startRepl() {
 		if exists {
 			err := command.callback(words[1:]...)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println(redErr(err))
 			}
 			continue
 		} else {
-			fmt.Println("Unknown command")
+			fmt.Println(redErr("Unknown command"))
 			continue
 		}
 	}
