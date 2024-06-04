@@ -1,48 +1,62 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strings"
 
+	"atomicgo.dev/keyboard"
+	"atomicgo.dev/keyboard/keys"
 	"github.com/fatih/color"
 )
 
+var cyan func(a ...interface{}) string = color.New(color.FgCyan, color.Bold).SprintFunc()
+var redErr func(a ...interface{}) string = color.New(color.FgRed).SprintFunc()
+
 func startRepl() {
-	cyan := color.New(color.FgCyan, color.Bold).SprintFunc()
-	redErr := color.New(color.FgRed).SprintFunc()
-
-	reader := bufio.NewScanner(os.Stdin)
-	for {
-		fmt.Printf("\n%s > ", cyan("Pokedex"))
-		reader.Scan()
-
-		words := cleanInput(reader.Text())
-		if len(words) == 0 {
-			continue
-		}
-
-		commandName := words[0]
-
-		command, exists := getCommands()[commandName]
-		if exists {
-			err := command.callback(words[1:]...)
-			if err != nil {
-				fmt.Println(redErr(err))
+	input := ""
+	fmt.Printf("\n%s > ", cyan("Pokedex"))
+	keyboard.Listen(func(key keys.Key) (stop bool, err error) {
+		switch key.Code {
+		case keys.CtrlC, keys.Escape:
+			return true, nil
+		case keys.Enter:
+			fmt.Println()
+			if tokens := cleanInput(input); tokens != nil {
+				processCommand(*tokens...)
 			}
-			continue
-		} else {
-			fmt.Println(redErr("Unknown command"))
-			continue
+			input = ""
+			fmt.Printf("\n%s > ", cyan("Pokedex"))
+		case keys.Backspace:
+			if len(input) >= 1 {
+				input = input[:len(input)-1]
+				fmt.Printf("\033[2K\r%s > %s", cyan("Pokedex"), input)
+			}
+		default:
+			input += string(key.Runes)
+			fmt.Print(string(key.Runes))
 		}
+		return false, nil
+	})
+}
+
+func processCommand(inputs ...string) {
+	command, exists := getCommands()[inputs[0]]
+	if !exists {
+		fmt.Println(redErr("Unknown command"))
+		return
+	}
+	if err := command.callback(inputs[1:]...); err != nil {
+		fmt.Println(redErr(err))
 	}
 }
 
-func cleanInput(text string) []string {
-	output := strings.ToLower(text)
+func cleanInput(text string) *[]string {
+	output := strings.TrimSpace(strings.ToLower(text))
 	words := strings.Fields(output)
-	return words
+	if len(words) == 0 {
+		return nil
+	}
+	return &words
 }
 
 type cliCommand struct {
