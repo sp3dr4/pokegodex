@@ -12,9 +12,12 @@ import (
 var cyan func(a ...interface{}) string = color.New(color.FgCyan, color.Bold).SprintFunc()
 var redErr func(a ...interface{}) string = color.New(color.FgRed).SprintFunc()
 
+var history []string = []string{}
+var historyIx int = -1
+
 func startRepl() {
 	input := ""
-	fmt.Printf("\n%s > ", cyan("Pokedex"))
+	prompt("", true)
 	keyboard.Listen(func(key keys.Key) (stop bool, err error) {
 		switch key.Code {
 		case keys.CtrlC, keys.Escape:
@@ -22,15 +25,33 @@ func startRepl() {
 		case keys.Enter:
 			fmt.Println()
 			if tokens := cleanInput(input); tokens != nil {
-				processCommand(*tokens...)
+				if processCommand(*tokens...) {
+					history = append([]string{input}, history...)
+				}
 			}
 			input = ""
-			fmt.Printf("\n%s > ", cyan("Pokedex"))
+			prompt("", true)
 		case keys.Backspace:
 			if len(input) >= 1 {
 				input = input[:len(input)-1]
-				fmt.Printf("\033[2K\r%s > %s", cyan("Pokedex"), input)
+				prompt(input, false)
 			}
+		case keys.Up:
+			if len(history) <= historyIx+1 {
+				return false, nil
+			}
+			historyIx += 1
+			input = history[historyIx]
+			prompt(input, false)
+		case keys.Down:
+			historyIx -= 1
+			if historyIx < 0 {
+				historyIx = -1
+				input = ""
+			} else {
+				input = history[historyIx]
+			}
+			prompt(input, false)
 		default:
 			input += string(key.Runes)
 			fmt.Print(string(key.Runes))
@@ -39,15 +60,25 @@ func startRepl() {
 	})
 }
 
-func processCommand(inputs ...string) {
+func prompt(input string, newline bool) {
+	if newline {
+		fmt.Printf("\n%s > %s", cyan("Pokedex"), input)
+	} else {
+		fmt.Printf("\033[2K\r%s > %s", cyan("Pokedex"), input)
+	}
+}
+
+func processCommand(inputs ...string) bool {
 	command, exists := getCommands()[inputs[0]]
 	if !exists {
 		fmt.Println(redErr("Unknown command"))
-		return
+		return false
 	}
 	if err := command.callback(inputs[1:]...); err != nil {
 		fmt.Println(redErr(err))
+		return false
 	}
+	return true
 }
 
 func cleanInput(text string) *[]string {

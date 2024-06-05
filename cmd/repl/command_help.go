@@ -21,6 +21,5 @@ func commandHelp(args ...string) error {
 	for _, cmd := range getCommands() {
 		fmt.Printf("%s: %s\n", cyan(cmd.name), cmd.description)
 	}
-	fmt.Println()
 	return nil
 }
